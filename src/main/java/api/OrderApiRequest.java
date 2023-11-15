@@ -2,7 +2,7 @@ package api;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
-import model.order.create.OrderCreateModelRequest;
+import model.order.create.OrderCreateRequestModel;
 
 import static config.Config.CREATE_ORDER;
 import static config.Config.MAIN_URL;
@@ -10,17 +10,17 @@ import static config.Config.MAIN_URL;
 public class OrderApiRequest extends BaseApi
 {
     @Step("Отправка запроса на ручку по созданию заказа")
-    public Response createOrder(OrderCreateModelRequest orderCreateModelRequest, String accessToken) {
+    public Response createOrder(OrderCreateRequestModel orderCreateRequestModel, String accessToken) {
         return baseRequest()
                 .header("Authorization", accessToken)
-                .body(orderCreateModelRequest)
+                .body(orderCreateRequestModel)
                 .post(MAIN_URL + CREATE_ORDER);
     }
 
     @Step("Отправка запроса на ручку по создание заказа без авторизации")
-    public Response createOrderWithoutLogin(OrderCreateModelRequest orderCreateModelRequest) {
+    public Response createOrderWithoutLogin(OrderCreateRequestModel orderCreateRequestModel) {
         return baseRequest()
-                .body(orderCreateModelRequest)
+                .body(orderCreateRequestModel)
                 .post(MAIN_URL + CREATE_ORDER);
     }
     @Step("Отправка запроса на ручку по получению заказа конкретного пользователя с его токеном")

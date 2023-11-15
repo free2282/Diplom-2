@@ -1,19 +1,24 @@
 package User;
 import api.UserApiRequest;
-import com.codeborne.selenide.commands.As;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import model.user.create.request.UserCreateRequestModel;
 import model.user.create.response.UserCreateResponseModel;
 import model.user.delete.request.UserDeleteRequestModel;
+import model.user.delete.response.UserDeleteResponseModel;
 import model.user.update.request.UserUpdateRequestModel;
+import model.user.update.response.UserUpdateErrorModel;
+import model.user.update.response.UserUpdateResponseModel;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.apache.http.HttpStatus.*;
 import static generator.Generator.setRandomUserDataForCreate;
+import static org.junit.Assert.assertFalse;
 
 public class UserUpdateTest
 {
@@ -28,7 +33,8 @@ public class UserUpdateTest
     private String token;
 
     @Before
-    public void setUp(){
+    public void setUp()
+    {
         userApiRequest = new UserApiRequest();
 
         userCreateRequestModel = setRandomUserDataForCreate();
@@ -39,6 +45,9 @@ public class UserUpdateTest
 
         userCreateResponseModel = responseOfCreate.body().as(UserCreateResponseModel.class);
         token = userCreateResponseModel.getAccessToken();
+
+        assertEquals(SC_OK, responseOfCreate.statusCode());
+        assertTrue(userCreateResponseModel.isSuccess());
     }
 
     @DisplayName("изменение имени пользователя")
@@ -46,10 +55,13 @@ public class UserUpdateTest
     @Test
     public void updateChangeNameTest()
     {
-        userUpdateRequestModel = new UserUpdateRequestModel(email, password,name + "Собакевич");
+        name = "Собакевич";
+        userUpdateRequestModel = new UserUpdateRequestModel(email, password,name);
         Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
-        Assert.assertEquals(SC_OK, responseOfUpdate.statusCode());
+        assertTrue(userUpdateResponseModel.isSuccess());
+        assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
     @DisplayName("изменение пароля пользователя")
@@ -60,8 +72,10 @@ public class UserUpdateTest
         password = password + "123";
         userUpdateRequestModel = new UserUpdateRequestModel(email, password, name);
         Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
-        Assert.assertEquals(SC_OK, responseOfUpdate.statusCode());
+        assertTrue(userUpdateResponseModel.isSuccess());
+        assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
     @DisplayName("изменение почты пользователя")
@@ -72,8 +86,10 @@ public class UserUpdateTest
         email = "change" + email;
         userUpdateRequestModel = new UserUpdateRequestModel(email, password, name);
         Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
-        Assert.assertEquals(SC_OK, responseOfUpdate.statusCode());
+        assertTrue(userUpdateResponseModel.isSuccess());
+        assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
     @DisplayName("изменение имени пользователя без авторизации")
@@ -83,8 +99,10 @@ public class UserUpdateTest
     {
         userUpdateRequestModel = new UserUpdateRequestModel(email, password,name + "Собакевич");
         Response responseOfUpdate = userApiRequest.updateUserWithoutAccess(userUpdateRequestModel);
+        UserUpdateErrorModel userUpdateErrorModel = responseOfUpdate.body().as(UserUpdateErrorModel.class);
 
-        Assert.assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertFalse(userUpdateErrorModel.isSuccess());
     }
     @DisplayName("изменение пароля пользователя без авторизации")
     @Description("ожидается 401 статус код")
@@ -93,8 +111,10 @@ public class UserUpdateTest
     {
         userUpdateRequestModel = new UserUpdateRequestModel(email, password + "123", name);
         Response responseOfUpdate = userApiRequest.updateUserWithoutAccess(userUpdateRequestModel);
+        UserUpdateErrorModel userUpdateErrorModel = responseOfUpdate.body().as(UserUpdateErrorModel.class);
 
-        Assert.assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertFalse(userUpdateErrorModel.isSuccess());
     }
 
     @DisplayName("изменение почты пользователя без авторизации")
@@ -104,8 +124,10 @@ public class UserUpdateTest
     {
         userUpdateRequestModel = new UserUpdateRequestModel(email+"change", password, name);
         Response responseOfUpdate = userApiRequest.updateUserWithoutAccess(userUpdateRequestModel);
+        UserUpdateErrorModel userUpdateErrorModel = responseOfUpdate.body().as(UserUpdateErrorModel.class);
 
-        Assert.assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
+        assertFalse(userUpdateErrorModel.isSuccess());
     }
 
     @After
@@ -113,7 +135,9 @@ public class UserUpdateTest
     {
         UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(email, password);
         Response responseDown = userApiRequest.deleteUser(userDeleteRequestModel, token);
+        UserDeleteResponseModel userDeleteResponseModel = responseDown.body().as(UserDeleteResponseModel.class);
 
-        Assert.assertEquals(SC_ACCEPTED, responseDown.statusCode());
+        assertEquals(SC_ACCEPTED, responseDown.statusCode());
+        assertTrue(userDeleteResponseModel.isSuccess());
     }
 }

@@ -1,27 +1,29 @@
 package User;
 
 import api.UserApiRequest;
-import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
+import model.user.create.response.UserCreateErrorModel;
 import model.user.create.response.UserCreateResponseModel;
 
 import model.user.create.request.UserCreateRequestModel;
 import model.user.delete.request.UserDeleteRequestModel;
-import org.junit.After;
+import model.user.delete.response.UserDeleteResponseModel;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.apache.http.HttpStatus.*;
 import static generator.Generator.setRandomUserDataForCreate;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-public class UserCreateTest {
+public class UserCreateTest
+{
     private UserCreateRequestModel userCreateRequestModel;
     private UserApiRequest userApiRequest;
-
+    private UserDeleteRequestModel userDeleteRequestModel;
+    private UserDeleteResponseModel userDeleteResponseModel;
+    private UserCreateResponseModel userCreateResponseModel;
 
     @Before
     public void setUp() {
@@ -34,30 +36,44 @@ public class UserCreateTest {
     public void createUser()
     {
         Response response = userApiRequest.createUser(userCreateRequestModel);
+        userCreateResponseModel = response.as(UserCreateResponseModel.class);
+
+        assertTrue(userCreateResponseModel.isSuccess());
         assertEquals(SC_OK, response.statusCode());
 
-        UserCreateResponseModel userCreateResponseModel = response.as(UserCreateResponseModel.class);
-        assertTrue(userCreateResponseModel.isSuccess());
 
         String token = userCreateResponseModel.getAccessToken();
-
-
-        UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword());
+        userDeleteRequestModel = new UserDeleteRequestModel(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword());
         Response responseDown = userApiRequest.deleteUser(userDeleteRequestModel, token);
+        userDeleteResponseModel = responseDown.body().as(UserDeleteResponseModel.class);
 
-        Assert.assertEquals(SC_ACCEPTED, responseDown.statusCode());
-
-
+        assertEquals(SC_ACCEPTED, responseDown.statusCode());
+        Assert.assertTrue(userDeleteResponseModel.isSuccess());
     }
 
     @DisplayName("Создание уже существующего пользователя")
     @Test
     public void createExistingUser() {
-        userApiRequest.createUser(userCreateRequestModel);
         Response response = userApiRequest.createUser(userCreateRequestModel);
+        userCreateResponseModel = response.body().as(UserCreateResponseModel.class);
+        String token = userCreateResponseModel.getAccessToken();
 
-        assertEquals(SC_FORBIDDEN, response.statusCode());
-        System.out.println(response.statusCode());
+        assertEquals(SC_OK, response.statusCode());
+        assertTrue(userCreateResponseModel.isSuccess());
+
+
+        Response responseExistingUser = userApiRequest.createUser(userCreateRequestModel);
+        UserCreateErrorModel userCreateErrorModel = responseExistingUser.body().as(UserCreateErrorModel.class);
+
+        assertFalse(userCreateErrorModel.isSuccess());
+        assertEquals(SC_FORBIDDEN, responseExistingUser.statusCode());
+
+        userDeleteRequestModel = new UserDeleteRequestModel(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword());
+        Response responseDeleteExistingUser = userApiRequest.deleteUser(userDeleteRequestModel, token);
+        userDeleteResponseModel = responseDeleteExistingUser.body().as(UserDeleteResponseModel.class);
+
+        assertTrue(userDeleteResponseModel.isSuccess());
+        assertEquals(SC_ACCEPTED, responseDeleteExistingUser.statusCode());
     }
 
     @DisplayName("Создание пользователя с пустым имененем")

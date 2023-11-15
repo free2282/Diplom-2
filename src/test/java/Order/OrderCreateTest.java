@@ -5,15 +5,19 @@ import api.UserApiRequest;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import model.order.create.OrderCreateModelRequest;
+import model.order.create.OrderCreateErrorModel;
+import model.order.create.OrderCreateRequestModel;
+import model.order.create.OrderCreateResponseModel;
 import model.user.create.request.UserCreateRequestModel;
 import model.user.create.response.UserCreateResponseModel;
+import model.user.delete.request.UserDeleteRequestModel;
+import model.user.delete.response.UserDeleteResponseModel;
 import model.user.login.request.UserLoginRequestModel;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static generator.Generator.setRandomUserDataForCreate;
+import static org.junit.Assert.*;
 
 public class OrderCreateTest
 {
@@ -21,10 +25,8 @@ public class OrderCreateTest
     private UserCreateRequestModel userCreateRequestModel;
     private OrderApiRequest orderApiRequest;
     private UserLoginRequestModel userLoginRequestModel;
-    private OrderCreateModelRequest orderCreateModelRequest;
+    private OrderCreateRequestModel orderCreateRequestModel;
     private Response response;
-    private String email;
-    private String password;
 
 
     @Before
@@ -32,7 +34,7 @@ public class OrderCreateTest
     {
         orderApiRequest = new OrderApiRequest();
         String[] ingredients = {"61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f", "61c0c5a71d1f82001bdaaa78"};
-        orderCreateModelRequest = new OrderCreateModelRequest(ingredients);
+        orderCreateRequestModel = new OrderCreateRequestModel(ingredients);
     }
 
     @DisplayName("Создание заказа с залогиненным пользователем")
@@ -46,16 +48,34 @@ public class OrderCreateTest
         UserCreateResponseModel userCreateResponseModel = response.body().as(UserCreateResponseModel.class);
         String token = userCreateResponseModel.getAccessToken();
 
-        Response responseOfOrder =  orderApiRequest.createOrder(orderCreateModelRequest, token);
-        Assert.assertEquals(SC_OK, responseOfOrder.statusCode());
+        assertEquals(SC_OK, response.statusCode());
+        assertTrue(userCreateResponseModel.isSuccess());
+
+        Response responseOfOrder =  orderApiRequest.createOrder(orderCreateRequestModel, token);
+        OrderCreateResponseModel orderCreateResponseModel = responseOfOrder.body().as(OrderCreateResponseModel.class);
+        //основная проверка создания
+        assertTrue(orderCreateResponseModel.isSuccess());
+        assertEquals(SC_OK, responseOfOrder.statusCode());
+
+        UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(
+                userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword()
+        );
+        Response responseOfDelete = userApiRequest.deleteUser(userDeleteRequestModel, token);
+        UserDeleteResponseModel userDeleteResponseModel = responseOfDelete.body().as(UserDeleteResponseModel.class);
+
+        assertTrue(userDeleteResponseModel.isSuccess());
+        assertEquals(SC_ACCEPTED, responseOfDelete.statusCode());
     }
 
     @DisplayName("Создание заказа без логина в систему")
     @Test
     public void createOrderWithoutLogin()
     {
-        Response responseOfOrder =  orderApiRequest.createOrderWithoutLogin(orderCreateModelRequest);
-        Assert.assertEquals(SC_OK, responseOfOrder.statusCode());
+        Response responseOfOrder =  orderApiRequest.createOrderWithoutLogin(orderCreateRequestModel);
+        OrderCreateResponseModel orderCreateResponseModel = responseOfOrder.body().as(OrderCreateResponseModel.class);
+
+        assertTrue(orderCreateResponseModel.isSuccess());
+        assertEquals(SC_OK, responseOfOrder.statusCode());
     }
 
     @DisplayName("Создание заказа без ингридиентов в корзине")
@@ -64,10 +84,13 @@ public class OrderCreateTest
     public void createOrderWithoutIngredients()
     {
         String[] voidIngredients = {};
-        orderCreateModelRequest.setIngredients(voidIngredients);
+        orderCreateRequestModel.setIngredients(voidIngredients);
 
-        Response responseOfOrder =  orderApiRequest.createOrderWithoutLogin(orderCreateModelRequest);
-        Assert.assertEquals(SC_BAD_REQUEST, responseOfOrder.statusCode());
+        Response responseOfOrder = orderApiRequest.createOrderWithoutLogin(orderCreateRequestModel);
+        OrderCreateErrorModel orderCreateErrorModel = responseOfOrder.body().as(OrderCreateErrorModel.class);
+
+        assertEquals(SC_BAD_REQUEST, responseOfOrder.statusCode());
+        assertFalse(orderCreateErrorModel.isSuccess());
     }
 
     @DisplayName("Создание заказа с ошибочными ингридиентами в корзине")
@@ -76,9 +99,9 @@ public class OrderCreateTest
     public void createOrderWithErrorIdFoods()
     {
         String[] voidIngredients = {"61c0c5a71d1f82001bdaaa6d2573regw", "61c0c5a71d1f82001bdaaa6fqwevfwer", "61c0c5a71d1f82001bdaaa78wfererwg"};
-        orderCreateModelRequest.setIngredients(voidIngredients);
+        orderCreateRequestModel.setIngredients(voidIngredients);
 
-        Response responseOfOrder =  orderApiRequest.createOrderWithoutLogin(orderCreateModelRequest);
-        Assert.assertEquals(SC_INTERNAL_SERVER_ERROR, responseOfOrder.statusCode());
+        Response responseOfOrder =  orderApiRequest.createOrderWithoutLogin(orderCreateRequestModel);
+        assertEquals(SC_INTERNAL_SERVER_ERROR, responseOfOrder.statusCode());
     }
 }

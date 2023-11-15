@@ -1,20 +1,22 @@
-package model.user.create.response;
+package model.user.login.response;
 
-public class UserCreateResponseModel
+import model.user.create.response.UserCreate;
+
+public class UserLoginResponseModel
 {
     private Boolean success;
     private UserCreate userCreate;
     private String accessToken;
     public String refreshToken;
 
-    public UserCreateResponseModel(boolean success, UserCreate userCreate, String accessToken, String refreshToken) {
+    public UserLoginResponseModel(boolean success, UserCreate userCreate, String accessToken, String refreshToken) {
         this.success = success;
         this.userCreate = userCreate;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
 
-    public UserCreateResponseModel() {
+    public UserLoginResponseModel() {
     }
 
     public boolean isSuccess() {

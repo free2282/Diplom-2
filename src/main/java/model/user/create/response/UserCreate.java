@@ -1,17 +1,17 @@
 package model.user.create.response;
 
-public class User
+public class UserCreate
 {
     private String email;
     private String name;
 
-    public User(String email, String name)
+    public UserCreate(String email, String name)
     {
         this.email = email;
         this.name = name;
     }
 
-    public User() {
+    public UserCreate() {
     }
 
     public String getEmail() {

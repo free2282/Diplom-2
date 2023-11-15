@@ -1,11 +1,11 @@
 package model.order.create;
 
-public class OrderCreateModelRequest
+public class OrderCreateRequestModel
 {
     private String[] ingredients;
 
 
-    public OrderCreateModelRequest(String[] ingredients) {
+    public OrderCreateRequestModel(String[] ingredients) {
         this.ingredients = ingredients;
     }
 
