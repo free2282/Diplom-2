@@ -1,6 +1,8 @@
-package User;
+package user;
+import api.BaseTest;
 import api.UserApiRequest;
 import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import model.user.create.request.UserCreateRequestModel;
@@ -23,33 +25,25 @@ import static org.junit.Assert.assertFalse;
 public class UserUpdateTest
 {
     private UserApiRequest userApiRequest;
-    private UserCreateRequestModel userCreateRequestModel;
-    private UserCreateResponseModel userCreateResponseModel;
     private UserUpdateRequestModel userUpdateRequestModel;
-    private Response responseOfCreate;
     private String name;
     private String email;
     private String password;
-    private String token;
+    private BaseTest baseTest;
 
     @Before
     public void setUp()
     {
         userApiRequest = new UserApiRequest();
+        baseTest = new BaseTest();
+        baseTest.createUser();
 
-        userCreateRequestModel = setRandomUserDataForCreate();
-        responseOfCreate = userApiRequest.createUser(userCreateRequestModel);
-        name = userCreateRequestModel.getName();
-        email = userCreateRequestModel.getEmail();
-        password = userCreateRequestModel.getPassword();
-
-        userCreateResponseModel = responseOfCreate.body().as(UserCreateResponseModel.class);
-        token = userCreateResponseModel.getAccessToken();
-
-        assertEquals(SC_OK, responseOfCreate.statusCode());
-        assertTrue(userCreateResponseModel.isSuccess());
+        name = baseTest.getUserCreateRequestModel().getName();
+        password = baseTest.getUserCreateRequestModel().getPassword();
+        email = baseTest.getUserCreateRequestModel().getEmail();
     }
 
+    @Step("Изменение имени пользователя")
     @DisplayName("изменение имени пользователя")
     @Description("создатеся пользователь, после чего достается его токен авторизации и передется в header запроса на обновление")
     @Test
@@ -57,13 +51,14 @@ public class UserUpdateTest
     {
         name = "Собакевич";
         userUpdateRequestModel = new UserUpdateRequestModel(email, password,name);
-        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, baseTest.getToken());
         UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
         assertTrue(userUpdateResponseModel.isSuccess());
         assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
+    @Step("Изменение пароля пользователя")
     @DisplayName("изменение пароля пользователя")
     @Description("создатеся пользователь, после чего достается его токен авторизации и передется в header запроса на обновление")
     @Test
@@ -71,13 +66,14 @@ public class UserUpdateTest
     {
         password = password + "123";
         userUpdateRequestModel = new UserUpdateRequestModel(email, password, name);
-        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, baseTest.getToken());
         UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
         assertTrue(userUpdateResponseModel.isSuccess());
         assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
+    @Step("Изменение почты пользователя")
     @DisplayName("изменение почты пользователя")
     @Description("создатеся пользователь, после чего достается его токен авторизации и передется в header запроса на обновление")
     @Test
@@ -85,13 +81,14 @@ public class UserUpdateTest
     {
         email = "change" + email;
         userUpdateRequestModel = new UserUpdateRequestModel(email, password, name);
-        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, token);
+        Response responseOfUpdate = userApiRequest.updateUser(userUpdateRequestModel, baseTest.getToken());
         UserUpdateResponseModel userUpdateResponseModel = responseOfUpdate.body().as(UserUpdateResponseModel.class);
 
         assertTrue(userUpdateResponseModel.isSuccess());
         assertEquals(SC_OK, responseOfUpdate.statusCode());
     }
 
+    @Step("Изменение имени пользователя без авторизации")
     @DisplayName("изменение имени пользователя без авторизации")
     @Description("ожидается 401 статус код")
     @Test
@@ -104,6 +101,7 @@ public class UserUpdateTest
         assertEquals(SC_UNAUTHORIZED, responseOfUpdate.statusCode());
         assertFalse(userUpdateErrorModel.isSuccess());
     }
+    @Step("Изменение пароля пользователя без авторизации")
     @DisplayName("изменение пароля пользователя без авторизации")
     @Description("ожидается 401 статус код")
     @Test
@@ -117,6 +115,7 @@ public class UserUpdateTest
         assertFalse(userUpdateErrorModel.isSuccess());
     }
 
+    @Step("Изменение почты пользователя без авторизации")
     @DisplayName("изменение почты пользователя без авторизации")
     @Description("ожидается 401 статус код")
     @Test
@@ -133,11 +132,6 @@ public class UserUpdateTest
     @After
     public void setDown()
     {
-        UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(email, password);
-        Response responseDown = userApiRequest.deleteUser(userDeleteRequestModel, token);
-        UserDeleteResponseModel userDeleteResponseModel = responseDown.body().as(UserDeleteResponseModel.class);
-
-        assertEquals(SC_ACCEPTED, responseDown.statusCode());
-        assertTrue(userDeleteResponseModel.isSuccess());
+        baseTest.deleteUserAfterLocalRegistration();
     }
 }

@@ -1,6 +1,8 @@
-package User;
+package user;
 
+import api.BaseTest;
 import api.UserApiRequest;
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import model.user.create.response.UserCreateErrorModel;
@@ -9,7 +11,6 @@ import model.user.create.response.UserCreateResponseModel;
 import model.user.create.request.UserCreateRequestModel;
 import model.user.delete.request.UserDeleteRequestModel;
 import model.user.delete.response.UserDeleteResponseModel;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,16 +22,15 @@ public class UserCreateTest
 {
     private UserCreateRequestModel userCreateRequestModel;
     private UserApiRequest userApiRequest;
-    private UserDeleteRequestModel userDeleteRequestModel;
-    private UserDeleteResponseModel userDeleteResponseModel;
     private UserCreateResponseModel userCreateResponseModel;
+    private BaseTest baseTest;
 
     @Before
     public void setUp() {
         userApiRequest = new UserApiRequest();
         userCreateRequestModel = setRandomUserDataForCreate();
     }
-
+    @Step("Создание пользователя")
     @DisplayName("Создание пользователя")
     @Test
     public void createUser()
@@ -42,40 +42,32 @@ public class UserCreateTest
         assertEquals(SC_OK, response.statusCode());
 
 
-        String token = userCreateResponseModel.getAccessToken();
-        userDeleteRequestModel = new UserDeleteRequestModel(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword());
-        Response responseDown = userApiRequest.deleteUser(userDeleteRequestModel, token);
-        userDeleteResponseModel = responseDown.body().as(UserDeleteResponseModel.class);
 
-        assertEquals(SC_ACCEPTED, responseDown.statusCode());
-        Assert.assertTrue(userDeleteResponseModel.isSuccess());
+        baseTest = new BaseTest();
+        baseTest.deleteUser(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword(), userCreateResponseModel.getAccessToken());
     }
-
+    @Step("Создание уже существующего пользователя")
     @DisplayName("Создание уже существующего пользователя")
     @Test
-    public void createExistingUser() {
-        Response response = userApiRequest.createUser(userCreateRequestModel);
-        userCreateResponseModel = response.body().as(UserCreateResponseModel.class);
-        String token = userCreateResponseModel.getAccessToken();
+    public void createExistingUser()
+    {
+        baseTest = new BaseTest();
+        baseTest.createUser();
 
-        assertEquals(SC_OK, response.statusCode());
-        assertTrue(userCreateResponseModel.isSuccess());
+        UserCreateRequestModel existingUserCreateRequestModel = new UserCreateRequestModel(
+                baseTest.getUserCreateRequestModel().getEmail(),
+                baseTest.getUserCreateRequestModel().getPassword(),
+                baseTest.getUserCreateRequestModel().getName());
 
-
-        Response responseExistingUser = userApiRequest.createUser(userCreateRequestModel);
+        Response responseExistingUser = userApiRequest.createUser(existingUserCreateRequestModel);
         UserCreateErrorModel userCreateErrorModel = responseExistingUser.body().as(UserCreateErrorModel.class);
 
         assertFalse(userCreateErrorModel.isSuccess());
         assertEquals(SC_FORBIDDEN, responseExistingUser.statusCode());
 
-        userDeleteRequestModel = new UserDeleteRequestModel(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword());
-        Response responseDeleteExistingUser = userApiRequest.deleteUser(userDeleteRequestModel, token);
-        userDeleteResponseModel = responseDeleteExistingUser.body().as(UserDeleteResponseModel.class);
-
-        assertTrue(userDeleteResponseModel.isSuccess());
-        assertEquals(SC_ACCEPTED, responseDeleteExistingUser.statusCode());
+        baseTest.deleteUserAfterLocalRegistration();
     }
-
+    @Step("Создание пользователя с пустым именем")
     @DisplayName("Создание пользователя с пустым имененем")
     @Test
     public void createUserWithVoidName() {
@@ -85,6 +77,7 @@ public class UserCreateTest
         assertEquals(SC_FORBIDDEN, response.statusCode());
     }
 
+    @Step("Создание пользователя с пустой почтой")
     @DisplayName("Создание пользователя с пустой почтой")
     @Test
     public void createUserWithVoidEmail() {
@@ -94,6 +87,7 @@ public class UserCreateTest
         assertEquals(SC_FORBIDDEN, response.statusCode());
     }
 
+    @Step("Создание пользователя с пустым паролем")
     @DisplayName("Создание пользователя с пустым паролем")
     @Test
     public void createUserWithVoidPassword() {

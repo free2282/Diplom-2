@@ -15,14 +15,14 @@ public class UserApiRequest extends BaseApi
     {
         return baseRequest()
                 .body(userApiRequestModel)
-                .post(MAIN_URL + CREATE_USER_URL);
+                .post(CREATE_USER_URL);
     }
     @Step("Отправка запроса на ручку по входу пользователя")
     public Response loginUser(UserLoginRequestModel userLoginRequestModel)
     {
         return baseRequest()
                 .body(userLoginRequestModel)
-                .post(MAIN_URL + LOGIN_USER_URL);
+                .post(LOGIN_USER_URL);
     }
     @Step("Отправка запроса на ручку по обновлению пользователя с его токеном")
     public Response updateUser(UserUpdateRequestModel userUpdateRequestModel, String accessToken)
@@ -30,7 +30,7 @@ public class UserApiRequest extends BaseApi
         return baseRequest()
                 .header("Authorization", accessToken)
                 .body(userUpdateRequestModel)
-                .patch(MAIN_URL + UPDATE_DELETE_USER_URL);
+                .patch(UPDATE_DELETE_USER_URL);
 
     }
     @Step("Отправка запроса на ручку по обновлению пользователя без токена")
@@ -38,7 +38,7 @@ public class UserApiRequest extends BaseApi
     {
         return baseRequest()
                 .body(userUpdateRequestModel)
-                .patch(MAIN_URL + UPDATE_DELETE_USER_URL);
+                .patch(UPDATE_DELETE_USER_URL);
 
     }
     @Step("Отправка запроса на ручку по удалению пользователя с его токеном")
@@ -47,6 +47,6 @@ public class UserApiRequest extends BaseApi
         return baseRequest()
                 .header("Authorization", accessToken)
                 .body(userDeleteRequestModel)
-                .delete(MAIN_URL + UPDATE_DELETE_USER_URL);
+                .delete(UPDATE_DELETE_USER_URL);
     }
 }

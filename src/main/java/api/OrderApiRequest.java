@@ -14,24 +14,24 @@ public class OrderApiRequest extends BaseApi
         return baseRequest()
                 .header("Authorization", accessToken)
                 .body(orderCreateRequestModel)
-                .post(MAIN_URL + CREATE_ORDER);
+                .post(CREATE_ORDER);
     }
 
     @Step("Отправка запроса на ручку по создание заказа без авторизации")
     public Response createOrderWithoutLogin(OrderCreateRequestModel orderCreateRequestModel) {
         return baseRequest()
                 .body(orderCreateRequestModel)
-                .post(MAIN_URL + CREATE_ORDER);
+                .post(CREATE_ORDER);
     }
     @Step("Отправка запроса на ручку по получению заказа конкретного пользователя с его токеном")
     public Response getCurrentOrder(String accessToken) {
         return baseRequest()
                 .header("Authorization", accessToken)
-                .get(MAIN_URL + CREATE_ORDER);
+                .get(CREATE_ORDER);
     }
     @Step("Отправка запроса на ручку по получению заказа без авторизации")
     public Response getCurrentOrderWithoutAccess() {
         return baseRequest()
-                .get(MAIN_URL + CREATE_ORDER);
+                .get(CREATE_ORDER);
     }
 }

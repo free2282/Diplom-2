@@ -1,32 +1,29 @@
-package Order;
+package order;
 import static org.apache.http.HttpStatus.*;
+
+import api.BaseTest;
 import api.OrderApiRequest;
 import api.UserApiRequest;
 import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import model.order.create.OrderCreateErrorModel;
 import model.order.create.OrderCreateRequestModel;
 import model.order.create.OrderCreateResponseModel;
 import model.user.create.request.UserCreateRequestModel;
-import model.user.create.response.UserCreateResponseModel;
-import model.user.delete.request.UserDeleteRequestModel;
-import model.user.delete.response.UserDeleteResponseModel;
 import model.user.login.request.UserLoginRequestModel;
 import org.junit.Before;
 import org.junit.Test;
 
-import static generator.Generator.setRandomUserDataForCreate;
 import static org.junit.Assert.*;
 
 public class OrderCreateTest
 {
-    private UserApiRequest userApiRequest;
-    private UserCreateRequestModel userCreateRequestModel;
+
     private OrderApiRequest orderApiRequest;
-    private UserLoginRequestModel userLoginRequestModel;
     private OrderCreateRequestModel orderCreateRequestModel;
-    private Response response;
+    private BaseTest baseTest;
 
 
     @Before
@@ -37,19 +34,15 @@ public class OrderCreateTest
         orderCreateRequestModel = new OrderCreateRequestModel(ingredients);
     }
 
+    @Step("Создание заказа с залогиненным пользователем")
     @DisplayName("Создание заказа с залогиненным пользователем")
     @Description("В header заказа добавляется токен авторизации")
     @Test
     public void creteOrderWithLoginTest()
     {
-        userApiRequest = new UserApiRequest();
-        userCreateRequestModel = setRandomUserDataForCreate();
-        response = userApiRequest.createUser(userCreateRequestModel);
-        UserCreateResponseModel userCreateResponseModel = response.body().as(UserCreateResponseModel.class);
-        String token = userCreateResponseModel.getAccessToken();
-
-        assertEquals(SC_OK, response.statusCode());
-        assertTrue(userCreateResponseModel.isSuccess());
+        baseTest = new BaseTest();
+        baseTest.createUser();
+        String token = baseTest.getToken();
 
         Response responseOfOrder =  orderApiRequest.createOrder(orderCreateRequestModel, token);
         OrderCreateResponseModel orderCreateResponseModel = responseOfOrder.body().as(OrderCreateResponseModel.class);
@@ -57,16 +50,12 @@ public class OrderCreateTest
         assertTrue(orderCreateResponseModel.isSuccess());
         assertEquals(SC_OK, responseOfOrder.statusCode());
 
-        UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(
-                userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword()
-        );
-        Response responseOfDelete = userApiRequest.deleteUser(userDeleteRequestModel, token);
-        UserDeleteResponseModel userDeleteResponseModel = responseOfDelete.body().as(UserDeleteResponseModel.class);
+        baseTest.deleteUserAfterLocalRegistration();
 
-        assertTrue(userDeleteResponseModel.isSuccess());
-        assertEquals(SC_ACCEPTED, responseOfDelete.statusCode());
+
     }
 
+    @Step("Создание заказа без логина в систему")
     @DisplayName("Создание заказа без логина в систему")
     @Test
     public void createOrderWithoutLogin()
@@ -78,6 +67,7 @@ public class OrderCreateTest
         assertEquals(SC_OK, responseOfOrder.statusCode());
     }
 
+    @Step("Создание заказа без ингридиентов в корзине")
     @DisplayName("Создание заказа без ингридиентов в корзине")
     @Description("В запросе не указываются ингридиенты, поэтому должна упасть 400 ошибка")
     @Test
@@ -93,6 +83,7 @@ public class OrderCreateTest
         assertFalse(orderCreateErrorModel.isSuccess());
     }
 
+    @Step("Создание заказа с ошибочными ингридиентами в корзине")
     @DisplayName("Создание заказа с ошибочными ингридиентами в корзине")
     @Description("В запросе не указываются неправильные ингридиенты, поэтому должна упасть 500 ошибка")
     @Test

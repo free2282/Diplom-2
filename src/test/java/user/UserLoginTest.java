@@ -1,7 +1,9 @@
-package User;
+package user;
 
+import api.BaseTest;
 import api.UserApiRequest;
 import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 
@@ -22,8 +24,6 @@ import static org.junit.Assert.*;
 public class UserLoginTest
 {
     private UserApiRequest userApiRequest;
-    private UserCreateRequestModel userCreateRequestModel;
-    private UserCreateResponseModel userCreateResponseModel;
     private UserLoginRequestModel userLoginRequestModel;
     private UserLoginErrorModel userLoginErrorModel;
     private UserLoginResponseModel userLoginResponseModel;
@@ -31,20 +31,19 @@ public class UserLoginTest
     private String passwordForLoginTest;
     private String name;
     Response response;
-    Response responseOfCrete;
-    private String token;
+    private BaseTest baseTest;
 
     @Before
     public void setUp()
     {
         userApiRequest = new UserApiRequest();
-        userCreateRequestModel = setRandomUserDataForCreate();
-        responseOfCrete = userApiRequest.createUser(userCreateRequestModel);
+        baseTest = new BaseTest();
+        baseTest.createUser();
 
-        emailForLoginTest = userCreateRequestModel.getEmail();
-        passwordForLoginTest = userCreateRequestModel.getPassword();
+        emailForLoginTest = baseTest.getUserCreateRequestModel().getEmail();
+        passwordForLoginTest = baseTest.getUserCreateRequestModel().getPassword();
     }
-
+    @Step("Авторизация пользователя")
     @DisplayName("авторизация пользователя")
     @Description("создатеся пользователь, после чего достается его токен авторизации и передется в header запроса на авторизацию")
     @Test
@@ -58,6 +57,7 @@ public class UserLoginTest
         assertEquals(SC_OK, response.statusCode());
     }
 
+    @Step("Авторизация пользователя с ошибочной почтой")
     @DisplayName("авторизация пользователя с ошибочной почтой")
     @Test
     public void loginTestWithErrorEmail()
@@ -71,6 +71,7 @@ public class UserLoginTest
         assertFalse(userLoginErrorModel.isSuccess());
     }
 
+    @Step("Авторизация пользователя с ошибочынм паролем")
     @DisplayName("авторизация пользователя с ошибочным паролем")
     @Test
     public void loginTestWithErrorPassword()
@@ -87,15 +88,6 @@ public class UserLoginTest
     @After
     public void setDown()
     {
-        userCreateResponseModel = responseOfCrete.body().as(UserCreateResponseModel.class);
-        token = userCreateResponseModel.getAccessToken();
-
-
-        UserDeleteRequestModel userDeleteRequestModel = new UserDeleteRequestModel(emailForLoginTest, passwordForLoginTest);
-        Response responseDown = userApiRequest.deleteUser(userDeleteRequestModel, token);
-        UserDeleteResponseModel userDeleteResponseModel = responseDown.body().as(UserDeleteResponseModel.class);
-
-        assertEquals(SC_ACCEPTED, responseDown.statusCode());
-        assertTrue(userDeleteResponseModel.isSuccess());
+        baseTest.deleteUserAfterLocalRegistration();
     }
 }
