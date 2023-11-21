@@ -1,12 +1,10 @@
 package model.user.login.response;
 
-public class UserLogin
-{
+public class UserLogin {
     private String email;
     private String name;
 
-    public UserLogin(String email, String name)
-    {
+    public UserLogin(String email, String name) {
         this.email = email;
         this.name = name;
     }

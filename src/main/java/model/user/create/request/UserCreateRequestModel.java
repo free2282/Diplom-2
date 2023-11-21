@@ -1,14 +1,12 @@
 package model.user.create.request;
 
-public class UserCreateRequestModel
-{
+public class UserCreateRequestModel {
     private String email;
     private String password;
     private String name;
 
 
-    public UserCreateRequestModel(String email, String password, String name)
-    {
+    public UserCreateRequestModel(String email, String password, String name) {
         this.email = email;
         this.password = password;
         this.name = name;

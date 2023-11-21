@@ -1,7 +1,6 @@
 package model.user.login.response;
 
-public class UserLoginErrorModel
-{
+public class UserLoginErrorModel {
     private boolean success;
     private String message;
 

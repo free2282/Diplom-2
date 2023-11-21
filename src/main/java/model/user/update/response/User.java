@@ -1,7 +1,6 @@
 package model.user.update.response;
 
-public class User
-{
+public class User {
     private String email;
     private String name;
 

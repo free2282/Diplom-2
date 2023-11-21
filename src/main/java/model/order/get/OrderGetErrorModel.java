@@ -1,7 +1,6 @@
 package model.order.get;
 
-public class OrderGetErrorModel
-{
+public class OrderGetErrorModel {
     private boolean success;
     private String message;
 

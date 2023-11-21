@@ -2,8 +2,7 @@ package model.order.get;
 
 import java.util.ArrayList;
 
-public class Order
-{
+public class Order {
     private String _id;
     private ArrayList<String> ingredients;
     private String status;

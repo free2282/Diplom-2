@@ -6,23 +6,18 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-
-import model.user.create.request.UserCreateRequestModel;
-import model.user.create.response.UserCreateResponseModel;
-import model.user.delete.request.UserDeleteRequestModel;
-import model.user.delete.response.UserDeleteResponseModel;
 import model.user.login.request.UserLoginRequestModel;
 import model.user.login.response.UserLoginErrorModel;
 import model.user.login.response.UserLoginResponseModel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.apache.http.HttpStatus.*;
-import static generator.Generator.setRandomUserDataForCreate;
+
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.junit.Assert.*;
 
-public class UserLoginTest
-{
+public class UserLoginTest {
     private UserApiRequest userApiRequest;
     private UserLoginRequestModel userLoginRequestModel;
     private UserLoginErrorModel userLoginErrorModel;
@@ -34,8 +29,7 @@ public class UserLoginTest
     private BaseTest baseTest;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         userApiRequest = new UserApiRequest();
         baseTest = new BaseTest();
         baseTest.createUser();
@@ -43,12 +37,12 @@ public class UserLoginTest
         emailForLoginTest = baseTest.getUserCreateRequestModel().getEmail();
         passwordForLoginTest = baseTest.getUserCreateRequestModel().getPassword();
     }
+
     @Step("Авторизация пользователя")
     @DisplayName("авторизация пользователя")
     @Description("создатеся пользователь, после чего достается его токен авторизации и передется в header запроса на авторизацию")
     @Test
-    public void loginTest()
-    {
+    public void loginTest() {
         userLoginRequestModel = new UserLoginRequestModel(emailForLoginTest, passwordForLoginTest);
         response = userApiRequest.loginUser(userLoginRequestModel);
         userLoginResponseModel = response.body().as(UserLoginResponseModel.class);
@@ -60,8 +54,7 @@ public class UserLoginTest
     @Step("Авторизация пользователя с ошибочной почтой")
     @DisplayName("авторизация пользователя с ошибочной почтой")
     @Test
-    public void loginTestWithErrorEmail()
-    {
+    public void loginTestWithErrorEmail() {
         userLoginRequestModel = new UserLoginRequestModel("error" + emailForLoginTest, passwordForLoginTest);
 
         response = userApiRequest.loginUser(userLoginRequestModel);
@@ -74,8 +67,7 @@ public class UserLoginTest
     @Step("Авторизация пользователя с ошибочынм паролем")
     @DisplayName("авторизация пользователя с ошибочным паролем")
     @Test
-    public void loginTestWithErrorPassword()
-    {
+    public void loginTestWithErrorPassword() {
         userLoginRequestModel = new UserLoginRequestModel(emailForLoginTest, "error" + passwordForLoginTest);
 
         response = userApiRequest.loginUser(userLoginRequestModel);
@@ -86,8 +78,7 @@ public class UserLoginTest
     }
 
     @After
-    public void setDown()
-    {
+    public void setDown() {
         baseTest.deleteUserAfterLocalRegistration();
     }
 }

@@ -1,7 +1,6 @@
 package model.order.get;
 
-public class OrderGetRequestModel
-{
+public class OrderGetRequestModel {
     private boolean success;
     private int total;
     private int totalToday;

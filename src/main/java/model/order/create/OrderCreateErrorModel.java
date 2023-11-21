@@ -1,7 +1,6 @@
 package model.order.create;
 
-public class OrderCreateErrorModel
-{
+public class OrderCreateErrorModel {
     private boolean success;
     private String message;
 

@@ -1,7 +1,6 @@
 package model.order.create;
 
-public class OrderCreateResponseModel
-{
+public class OrderCreateResponseModel {
     private boolean success;
     private String name;
     private Order order;

@@ -1,13 +1,11 @@
 package model.user.update.request;
 
-public class UserUpdateRequestModel
-{
+public class UserUpdateRequestModel {
     private String email;
     private String name;
     private String password;
 
-    public UserUpdateRequestModel(String email, String password, String name)
-    {
+    public UserUpdateRequestModel(String email, String password, String name) {
         this.email = email;
         this.name = name;
         this.password = password;

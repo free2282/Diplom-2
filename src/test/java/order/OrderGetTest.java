@@ -1,5 +1,4 @@
 package order;
-import static org.apache.http.HttpStatus.*;
 
 import api.BaseTest;
 import api.OrderApiRequest;
@@ -13,10 +12,11 @@ import model.order.get.OrderGetResponseModel;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.junit.Assert.*;
 
-public class OrderGetTest
-{
+public class OrderGetTest {
     private OrderApiRequest orderApiRequest;
     private OrderCreateRequestModel orderCreateRequestModel;
     private String token;
@@ -24,8 +24,7 @@ public class OrderGetTest
 
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         baseTest = new BaseTest();
         orderApiRequest = new OrderApiRequest();
 
@@ -41,27 +40,26 @@ public class OrderGetTest
     @DisplayName("Получение заказов пользователя")
     @Description("Генерируется пользователь, его заказ и происходи get заказа")
     @Test
-    public void getCurrentUserOrders()
-    {
+    public void getCurrentUserOrders() {
         Response responseOfGetOrder = orderApiRequest.getCurrentOrder(token);
         OrderGetResponseModel orderGetResponseModel = responseOfGetOrder.body().as(OrderGetResponseModel.class);
         //основыне проверки
         assertTrue(orderGetResponseModel.isSuccess());
-        assertEquals(SC_OK,responseOfGetOrder.statusCode());
+        assertEquals(SC_OK, responseOfGetOrder.statusCode());
 
 
         baseTest.deleteUserAfterLocalRegistration();
     }
+
     @Step("получение заказа не авторизированного пользователя")
     @DisplayName("получение заказа не авторизированного пользователя")
     @Description("ожидается 400 ошибка")
     @Test
-    public void getCurrentOrderWithoutLogin()
-    {
+    public void getCurrentOrderWithoutLogin() {
         Response responseOfGetOrder = orderApiRequest.getCurrentOrderWithoutAccess();
         OrderGetErrorModel orderGetErrorModel = responseOfGetOrder.body().as(OrderGetErrorModel.class);
 
-        assertEquals(SC_UNAUTHORIZED,responseOfGetOrder.statusCode());
+        assertEquals(SC_UNAUTHORIZED, responseOfGetOrder.statusCode());
         assertFalse(orderGetErrorModel.isSuccess());
     }
 }

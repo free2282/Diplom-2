@@ -1,14 +1,11 @@
 package model.user.login.request;
 
-public class UserLoginRequestModel
-{
+public class UserLoginRequestModel {
     private String email;
     private String password;
 
 
-
-    public UserLoginRequestModel(String email, String password)
-    {
+    public UserLoginRequestModel(String email, String password) {
         this.email = email;
         this.password = password;
     }

@@ -5,21 +5,18 @@ import api.UserApiRequest;
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
+import model.user.create.request.UserCreateRequestModel;
 import model.user.create.response.UserCreateErrorModel;
 import model.user.create.response.UserCreateResponseModel;
-
-import model.user.create.request.UserCreateRequestModel;
-import model.user.delete.request.UserDeleteRequestModel;
-import model.user.delete.response.UserDeleteResponseModel;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.http.HttpStatus.*;
 import static generator.Generator.setRandomUserDataForCreate;
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.Assert.*;
 
-public class UserCreateTest
-{
+public class UserCreateTest {
     private UserCreateRequestModel userCreateRequestModel;
     private UserApiRequest userApiRequest;
     private UserCreateResponseModel userCreateResponseModel;
@@ -30,11 +27,11 @@ public class UserCreateTest
         userApiRequest = new UserApiRequest();
         userCreateRequestModel = setRandomUserDataForCreate();
     }
+
     @Step("Создание пользователя")
     @DisplayName("Создание пользователя")
     @Test
-    public void createUser()
-    {
+    public void createUser() {
         Response response = userApiRequest.createUser(userCreateRequestModel);
         userCreateResponseModel = response.as(UserCreateResponseModel.class);
 
@@ -42,15 +39,14 @@ public class UserCreateTest
         assertEquals(SC_OK, response.statusCode());
 
 
-
         baseTest = new BaseTest();
         baseTest.deleteUser(userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword(), userCreateResponseModel.getAccessToken());
     }
+
     @Step("Создание уже существующего пользователя")
     @DisplayName("Создание уже существующего пользователя")
     @Test
-    public void createExistingUser()
-    {
+    public void createExistingUser() {
         baseTest = new BaseTest();
         baseTest.createUser();
 
@@ -67,6 +63,7 @@ public class UserCreateTest
 
         baseTest.deleteUserAfterLocalRegistration();
     }
+
     @Step("Создание пользователя с пустым именем")
     @DisplayName("Создание пользователя с пустым имененем")
     @Test

@@ -1,7 +1,6 @@
 package model.order.create;
 
-public class OrderCreateRequestModel
-{
+public class OrderCreateRequestModel {
     private String[] ingredients;
 
 

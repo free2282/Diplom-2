@@ -2,8 +2,7 @@ package model.order.get;
 
 import java.util.ArrayList;
 
-public class OrderGetResponseModel
-{
+public class OrderGetResponseModel {
     private boolean success;
     private ArrayList<Order> orders;
     private int total;

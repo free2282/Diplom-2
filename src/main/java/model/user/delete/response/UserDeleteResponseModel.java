@@ -1,7 +1,6 @@
 package model.user.delete.response;
 
-public class UserDeleteResponseModel
-{
+public class UserDeleteResponseModel {
     private boolean success;
     private String message;
 

@@ -1,7 +1,6 @@
 package model.user.delete.request;
 
-public class UserDeleteRequestModel
-{
+public class UserDeleteRequestModel {
     private String email;
     private String password;
 

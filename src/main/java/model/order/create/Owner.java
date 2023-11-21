@@ -1,7 +1,6 @@
 package model.order.create;
 
-public class Owner
-{
+public class Owner {
     private String name;
     private String email;
     private String createdAt;

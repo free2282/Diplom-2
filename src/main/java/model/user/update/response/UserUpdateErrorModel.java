@@ -1,7 +1,6 @@
 package model.user.update.response;
 
-public class UserUpdateErrorModel
-{
+public class UserUpdateErrorModel {
     private boolean success;
     private String message;
 

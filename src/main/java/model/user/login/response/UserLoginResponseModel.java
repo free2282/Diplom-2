@@ -2,8 +2,7 @@ package model.user.login.response;
 
 import model.user.create.response.UserCreate;
 
-public class UserLoginResponseModel
-{
+public class UserLoginResponseModel {
     private Boolean success;
     private UserCreate userCreate;
     private String accessToken;

@@ -1,7 +1,6 @@
 package model.user.create.response;
 
-public class UserCreateErrorModel
-{
+public class UserCreateErrorModel {
     private boolean success;
     private String message;
 

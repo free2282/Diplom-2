@@ -1,7 +1,6 @@
 package model.user.update.response;
 
-public class UserUpdateResponseModel
-{
+public class UserUpdateResponseModel {
     private boolean success;
     private User user;
 

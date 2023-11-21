@@ -9,15 +9,14 @@ import model.user.delete.request.UserDeleteRequestModel;
 
 import static generator.Generator.setRandomUserDataForCreate;
 
-public class BaseTest
-{
+public class BaseTest {
     private UserApiRequest userApi;
     private UserCreateRequestModel userCreateRequestModel;
     private UserDeleteRequestModel userDeleteRequestModel;
-   private String token;
-   @Step("Cоздание пользователя")
-    public void createUser()
-    {
+    private String token;
+
+    @Step("Cоздание пользователя")
+    public void createUser() {
         userApi = new UserApiRequest();
         userCreateRequestModel = setRandomUserDataForCreate();
         Response response = userApi.createUser(userCreateRequestModel);
@@ -27,8 +26,7 @@ public class BaseTest
 
     @Step("Удаление пользователя")
     @Description("Удаление пользователя в связке с регистрацией внутри одного теста")
-    public void deleteUserAfterLocalRegistration()
-    {
+    public void deleteUserAfterLocalRegistration() {
         userDeleteRequestModel = new UserDeleteRequestModel(
                 userCreateRequestModel.getEmail(), userCreateRequestModel.getPassword()
         );
@@ -37,21 +35,18 @@ public class BaseTest
     }
 
     @Step("Удаление пользователя")
-    public void deleteUser(String email, String password, String token)
-    {
+    public void deleteUser(String email, String password, String token) {
         userApi = new UserApiRequest();
         userDeleteRequestModel = new UserDeleteRequestModel(email, password);
         userApi.deleteUser(userDeleteRequestModel, token);
 
     }
 
-    public String getToken()
-    {
+    public String getToken() {
         return token;
     }
 
-    public UserCreateRequestModel getUserCreateRequestModel()
-    {
+    public UserCreateRequestModel getUserCreateRequestModel() {
         return userCreateRequestModel;
     }
 }

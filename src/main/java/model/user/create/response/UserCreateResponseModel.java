@@ -1,7 +1,6 @@
 package model.user.create.response;
 
-public class UserCreateResponseModel
-{
+public class UserCreateResponseModel {
     private Boolean success;
     private UserCreate userCreate;
     private String accessToken;
